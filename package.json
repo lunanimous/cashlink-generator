@@ -8,7 +8,9 @@
   },
   "dependencies": {
     "@nimiq/core-web": "^1.5.8",
+    "@nimiq/hub-api": "^1.4.2-beta.0",
     "@nimiq/style": "^0.8.3",
+    "@tailwindcss/forms": "^0.3.2",
     "vue": "^3.0.5"
   },
   "devDependencies": {
