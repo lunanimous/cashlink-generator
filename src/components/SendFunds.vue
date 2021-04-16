@@ -25,8 +25,7 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref, toRefs } from 'vue';
 import { loadNimiq } from '../lib/CoreLoader';
-import HubApi from '@nimiq/hub-api';
-import { connect } from '../lib/NetworkClient';
+import { connect, hubApi } from '../lib/NetworkClient';
 import { ClientTransactionDetails, Transaction } from '@nimiq/core-web';
 
 export default defineComponent({
@@ -59,6 +58,20 @@ export default defineComponent({
 
     const transactionListener = (transaction: ClientTransactionDetails) => {
       console.log(transaction);
+      if (transaction.state !== 'mined') {
+        return;
+      }
+
+      if (transaction.recipient.toUserFriendlyAddress() !== address.value) {
+        return;
+      }
+
+      // TODO: allow handling multiple transactions
+      if (transaction.value < total.value) {
+        return;
+      }
+
+      console.log('payment received, ready to generate');
     };
 
     async function getFundingAddress() {
@@ -75,7 +88,6 @@ export default defineComponent({
     }
 
     async function handlePay() {
-      const hubApi = new HubApi('https://hub.nimiq.com');
       const options = {
         appName: 'Cashlink Generator',
         recipient: address.value,
@@ -83,7 +95,7 @@ export default defineComponent({
       };
 
       try {
-        const transaction = await hubApi.checkout(options);
+        const transaction = await hubApi().checkout(options);
         isWaitingForPayment.value = true;
       } catch {
         isWaitingForPayment.value = true;

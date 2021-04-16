@@ -1,4 +1,5 @@
 import { version as CORE_VERSION } from '@nimiq/core-web/package.json';
+const NIMIQ_NETWORK = import.meta.env.VITE_NIMIQ_NETWORK;
 
 // For importing types it is recommendable to use the type x = import('@nimiq/core-web).x notation which only imports
 // the type without bundling the code.
@@ -60,7 +61,11 @@ export async function loadNimiqCryptography(): Promise<void> {
       // Note that we don't need to cache a promise for doImport() as the core already does that.
       await Nimiq.WasmHelper.doImport();
       // After the wasm is loaded we can initialize the genesis config.
-      Nimiq.GenesisConfig.main();
+      if (NIMIQ_NETWORK === 'main') {
+        Nimiq.GenesisConfig.main();
+      } else {
+        Nimiq.GenesisConfig.test();
+      }
     })();
   return nimiqCryptographyPromise;
 }
