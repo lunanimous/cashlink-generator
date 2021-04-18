@@ -3,7 +3,7 @@
     <h2 class="text-lg font-bold mb-4">Send funds</h2>
     <div>
       <p>Temporary address to fund: {{ address }}</p>
-      <p>Total funding required: {{ totalFundsRequired / 1e5 }} NIM</p>
+      <p>Total funding required: {{ total / 1e5 }} NIM</p>
 
       <div class="mt-6">
         <button
@@ -27,24 +27,36 @@ import { computed, defineComponent, onMounted, ref, toRefs } from 'vue';
 import { loadNimiq } from '../lib/CoreLoader';
 import { connect, hubApi } from '../lib/NetworkClient';
 import { ClientTransactionDetails, Transaction } from '@nimiq/core-web';
+import { CashlinkConfig } from '../types';
 
 export default defineComponent({
   props: {
-    totalFundsRequired: {
-      type: Number,
+    config: {
+      type: Object,
       required: true,
       default: () => {
-        return 0;
+        return {};
       },
     },
   },
-  emits: ['payment'],
+  emits: ['walletFunded'],
   setup(props, { emit }) {
-    const { totalFundsRequired } = toRefs(props);
+    const { config } = toRefs(props);
 
     const address = ref('');
     const isWaitingForPayment = ref(false);
     let wallet;
+
+    const total = computed(() => {
+      console.log(config.value);
+      const {
+        numberOfCashlinks,
+        amountPerCashlink,
+        feePerCashlink,
+      } = config.value;
+
+      return numberOfCashlinks * (amountPerCashlink * 1e5 + feePerCashlink);
+    });
 
     const transactionListener = (transaction: ClientTransactionDetails) => {
       console.log(transaction);
@@ -57,7 +69,7 @@ export default defineComponent({
       }
 
       // TODO: allow handling multiple transactions
-      if (transaction.value < totalFundsRequired.value) {
+      if (transaction.value < total.value) {
         return;
       }
 
@@ -81,7 +93,7 @@ export default defineComponent({
       const options = {
         appName: 'Cashlink Generator',
         recipient: address.value,
-        value: totalFundsRequired.value,
+        value: total.value,
       };
 
       try {
@@ -98,7 +110,7 @@ export default defineComponent({
 
     return {
       address,
-      totalFundsRequired,
+      total,
       isWaitingForPayment,
       handlePay,
     };

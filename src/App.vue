@@ -9,16 +9,14 @@
       v-if="step == Steps.Configure"
       @configure="handleConfigure"
     />
-    <send-funds
-      v-if="step == Steps.Send"
-      :totalFundsRequired="totalFundsRequired"
-    />
+    <send-funds v-if="step == Steps.Send" :config="cashlinkConfig" />
   </main>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { connect } from './lib/NetworkClient';
+import { CashlinkConfig } from './types';
 
 import ConfigureCashlinks from './components/ConfigureCashlinks.vue';
 import SendFunds from './components/SendFunds.vue';
@@ -39,7 +37,7 @@ export default defineComponent({
   setup() {
     const step = ref(Steps.Configure);
     const networkStatus = ref('loading');
-    const totalFundsRequired = ref(0);
+    const cashlinkConfig = ref({});
 
     async function start() {
       const client = await connect();
@@ -49,8 +47,9 @@ export default defineComponent({
       });
     }
 
-    const handleConfigure = (config: { total: number }) => {
-      totalFundsRequired.value = config.total;
+    const handleConfigure = (config: CashlinkConfig) => {
+      cashlinkConfig.value = config;
+      console.log(config);
       step.value = Steps.Send;
     };
 
@@ -60,7 +59,7 @@ export default defineComponent({
       networkStatus,
       step,
       Steps,
-      totalFundsRequired,
+      cashlinkConfig,
       handleConfigure,
     };
   },
