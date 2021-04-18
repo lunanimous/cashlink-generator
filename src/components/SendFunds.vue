@@ -24,28 +24,30 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref, toRefs } from 'vue';
-import { loadNimiq } from '../lib/CoreLoader';
 import { connect, hubApi } from '../lib/NetworkClient';
-import { ClientTransactionDetails, Transaction } from '@nimiq/core-web';
+import { ClientTransactionDetails, Transaction, Wallet } from '@nimiq/core-web';
 import { CashlinkConfig } from '../types';
 
 export default defineComponent({
   props: {
     config: {
-      type: Object,
+      type: Object as () => CashlinkConfig,
       required: true,
-      default: () => {
-        return {};
-      },
+    },
+    wallet: {
+      type: Object as () => Wallet,
+      required: true,
     },
   },
   emits: ['walletFunded'],
   setup(props, { emit }) {
-    const { config } = toRefs(props);
+    const { config, wallet } = toRefs(props);
 
-    const address = ref('');
     const isWaitingForPayment = ref(false);
-    let wallet;
+
+    const address = computed(() => {
+      return wallet.value.address.toUserFriendlyAddress();
+    });
 
     const total = computed(() => {
       console.log(config.value);
@@ -59,6 +61,7 @@ export default defineComponent({
     });
 
     const transactionListener = (transaction: ClientTransactionDetails) => {
+      const temporaryWallet: Wallet = wallet.value;
       console.log(transaction);
       if (transaction.state !== 'mined') {
         return;
@@ -74,20 +77,8 @@ export default defineComponent({
       }
 
       console.log('payment received, ready to generate');
+      emit('walletFunded');
     };
-
-    async function getFundingAddress() {
-      const Nimiq = await loadNimiq();
-      wallet = Nimiq.Wallet.generate();
-
-      address.value = wallet.address.toUserFriendlyAddress();
-      console.log('new wallet', address.value);
-
-      const client = await connect();
-      await client.waitForConsensusEstablished();
-
-      client.addTransactionListener(transactionListener, [address.value]);
-    }
 
     async function handlePay() {
       const options = {
@@ -104,8 +95,9 @@ export default defineComponent({
       }
     }
 
-    onMounted(() => {
-      getFundingAddress();
+    onMounted(async () => {
+      const client = await connect();
+      client.addTransactionListener(transactionListener, [address.value]);
     });
 
     return {

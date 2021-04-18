@@ -15,12 +15,16 @@
         <input
           v-model="amountPerCashlink"
           class="mt-1 block w-full"
-          type="text"
+          type="number"
         />
       </label>
       <label class="block">
         <span>Fee for each cashlink (in LUNA)</span>
-        <input v-model="feePerCashlink" class="mt-1 block w-full" type="text" />
+        <input
+          v-model="feePerCashlink"
+          class="mt-1 block w-full"
+          type="number"
+        />
       </label>
 
       <p>Total funds required: {{ total / 1e5 }} NIM</p>

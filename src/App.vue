@@ -9,35 +9,53 @@
       v-if="step == Steps.Configure"
       @configure="handleConfigure"
     />
-    <send-funds v-if="step == Steps.Send" :config="cashlinkConfig" />
+    <backup-wallet
+      v-if="step == Steps.Backup"
+      @walletCreate="handleWalletCreate"
+    />
+    <send-funds
+      v-if="step == Steps.Send"
+      :config="cashlinkConfig"
+      :wallet="temporaryWallet"
+      @walletFunded="handleWalletFund"
+    />
+    <generate-cashlinks
+      v-if="step == Steps.Generate"
+      :wallet="temporaryWallet"
+    />
   </main>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, Ref, ref } from 'vue';
 import { connect } from './lib/NetworkClient';
 import { CashlinkConfig } from './types';
 
 import ConfigureCashlinks from './components/ConfigureCashlinks.vue';
 import SendFunds from './components/SendFunds.vue';
+import BackupWallet from './components/BackupWallet.vue';
+import GenerateCashlinks from './components/GenerateCashlinks.vue';
 
 enum Steps {
-  Configure = 0,
-  Send = 1,
-  Generate = 2,
-  Finish = 3,
+  Configure,
+  Backup,
+  Send,
+  Generate,
 }
 
 export default defineComponent({
   name: 'App',
   components: {
     ConfigureCashlinks,
+    BackupWallet,
     SendFunds,
+    GenerateCashlinks,
   },
   setup() {
     const step = ref(Steps.Configure);
     const networkStatus = ref('loading');
     const cashlinkConfig = ref({});
+    const temporaryWallet = ref();
 
     async function start() {
       const client = await connect();
@@ -50,7 +68,17 @@ export default defineComponent({
     const handleConfigure = (config: CashlinkConfig) => {
       cashlinkConfig.value = config;
       console.log(config);
+      step.value = Steps.Backup;
+    };
+
+    const handleWalletCreate = ({ wallet }) => {
+      temporaryWallet.value = wallet;
       step.value = Steps.Send;
+    };
+
+    const handleWalletFund = () => {
+      console.log('wallet funded');
+      step.value = Steps.Generate;
     };
 
     start();
@@ -60,7 +88,10 @@ export default defineComponent({
       step,
       Steps,
       cashlinkConfig,
+      temporaryWallet,
       handleConfigure,
+      handleWalletCreate,
+      handleWalletFund,
     };
   },
 });
