@@ -3,7 +3,7 @@
     <h2 class="text-lg font-bold mb-4">Send funds</h2>
     <div>
       <p>Temporary address to fund: {{ address }}</p>
-      <p>Total funding required: {{ total }} NIM</p>
+      <p>Total funding required: {{ totalFundsRequired / 1e5 }} NIM</p>
 
       <div class="mt-6">
         <button
@@ -30,31 +30,21 @@ import { ClientTransactionDetails, Transaction } from '@nimiq/core-web';
 
 export default defineComponent({
   props: {
-    config: {
-      type: Object,
+    totalFundsRequired: {
+      type: Number,
       required: true,
       default: () => {
-        return {};
+        return 0;
       },
     },
   },
   emits: ['payment'],
   setup(props, { emit }) {
-    const { config } = toRefs(props);
+    const { totalFundsRequired } = toRefs(props);
 
     const address = ref('');
     const isWaitingForPayment = ref(false);
     let wallet;
-
-    const total = computed(() => {
-      const {
-        numberOfCashlinks,
-        amountPerCashlink,
-        feePerCashlink,
-      } = config.value;
-
-      return numberOfCashlinks * (amountPerCashlink + feePerCashlink);
-    });
 
     const transactionListener = (transaction: ClientTransactionDetails) => {
       console.log(transaction);
@@ -67,7 +57,7 @@ export default defineComponent({
       }
 
       // TODO: allow handling multiple transactions
-      if (transaction.value < total.value) {
+      if (transaction.value < totalFundsRequired.value) {
         return;
       }
 
@@ -91,14 +81,14 @@ export default defineComponent({
       const options = {
         appName: 'Cashlink Generator',
         recipient: address.value,
-        value: total.value * 1e5,
+        value: totalFundsRequired.value,
       };
 
       try {
         const transaction = await hubApi().checkout(options);
         isWaitingForPayment.value = true;
       } catch {
-        isWaitingForPayment.value = true;
+        isWaitingForPayment.value = false;
       }
     }
 
@@ -108,7 +98,7 @@ export default defineComponent({
 
     return {
       address,
-      total,
+      totalFundsRequired,
       isWaitingForPayment,
       handlePay,
     };

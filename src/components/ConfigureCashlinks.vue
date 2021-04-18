@@ -23,6 +23,8 @@
         <input v-model="feePerCashlink" class="mt-1 block w-full" type="text" />
       </label>
 
+      <p>Total funds required: {{ total / 1e5 }} NIM</p>
+
       <div>
         <button
           class="justify-center py-2 px-4 text-white bg-indigo-800 hover:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -36,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 
 export default defineComponent({
   emits: ['configure'],
@@ -45,15 +47,16 @@ export default defineComponent({
     const amountPerCashlink = ref(1);
     const feePerCashlink = ref(1);
 
-    function handleSubmit() {
-      const _numberOfCashlinks = Number(numberOfCashlinks.value);
-      const _amountPerCashlink = Number(amountPerCashlink.value);
-      const _feePerCashlink = Number(feePerCashlink.value);
+    const total = computed(() => {
+      return (
+        numberOfCashlinks.value *
+        (amountPerCashlink.value * 1e5 + feePerCashlink.value)
+      );
+    });
 
+    function handleSubmit() {
       const payload = {
-        numberOfCashlinks: _numberOfCashlinks,
-        amountPerCashlink: _amountPerCashlink,
-        feePerCashlink: _feePerCashlink,
+        total: total.value,
       };
       console.log(payload);
       emit('configure', payload);
@@ -63,6 +66,7 @@ export default defineComponent({
       numberOfCashlinks,
       amountPerCashlink,
       feePerCashlink,
+      total,
       handleSubmit,
     };
   },
