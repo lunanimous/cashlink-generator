@@ -1,18 +1,48 @@
 <template>
-  <div>
-    <h2 class="text-lg font-bold mb-4">Generate Cashlinks</h2>
+  <div class="flex justify-center">
+    <div class="nq-card">
+      <div class="nq-card-header">
+        <h2 class="nq-h1">Cashlinks</h2>
+      </div>
+      <div class="nq-card-body">
+        <p class="nq-text">Please find below the generated cashlinks, make sure to copy or download them.</p>
 
-    <p v-if="!cashlinksWithStatus">Generating cashlinks...</p>
-    <p v-for="(cashlink, index) in cashlinksWithStatus" :key="index">
-      <b>{{ cashlink.url }}</b>
-      <span>{{ cashlink.status }}</span>
-    </p>
+        <p v-if="!cashlinksWithStatus" class="nq-notice warning">Generating cashlinks..</p>
+        <button @click="handleSave" class="nq-button-pill light-blue" type="button">Download all cashlinks</button>
+
+        <div
+          v-for="(cashlink, index) in cashlinksWithStatus"
+          :key="index"
+          class="mt-12 flex items-center justify-between"
+        >
+          <div class="flex-1">
+            <p></p>
+            <a class="nq-link" :href="cashlink.url" target="__blank">Cashlink {{ index }}</a>
+          </div>
+          <div class="">
+            <p
+              v-if="cashlink.status == 0"
+              class="inline-block rounded-lg text-3xl bg-gray-100 p-4 text-gray-400 font-bold"
+            >
+              Pending
+            </p>
+            <p
+              v-if="cashlink.status == 1"
+              class="inline-block rounded-lg text-3xl bg-green-100 p-4 text-green-500 font-bold"
+            >
+              Funded
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Wallet } from '@nimiq/core-web';
 import { computed, defineComponent, onMounted, Ref, ref, toRefs } from 'vue';
+import { saveAs } from 'file-saver';
 import { Cashlink } from '../lib/Cashlink';
 import { connect } from '../lib/NetworkClient';
 import { CashlinkConfig } from '../types';
@@ -42,7 +72,7 @@ export default defineComponent({
 
       return cashlinks.value.map((cashlink: Cashlink, index: number) => {
         const statuses = cashlinkStatuses.value;
-        const status = statuses[index] ? 'funded' : 'waiting...';
+        const status = statuses[index] ? statuses[index] : 0;
         return {
           url: `${NIMIQ_HUB_URL}/cashlink/#${cashlink.render()}`,
           status: status,
@@ -69,15 +99,18 @@ export default defineComponent({
         const amount = config.value.amountPerCashlink;
         const fee = config.value.feePerCashlink;
 
-        const transaction = wallet.value.createTransaction(
-          address,
-          amount,
-          fee,
-          await client.getHeadHeight()
-        );
+        const transaction = wallet.value.createTransaction(address, amount, fee, await client.getHeadHeight());
         await client.sendTransaction(transaction);
         cashlinkStatuses.value.splice(i, 1, 1);
       }
+    }
+
+    function handleSave() {
+      console.log('save');
+      const lines = cashlinksWithStatus.value.map((cashlink) => cashlink.url);
+      const data = lines.join('\r\n');
+      const blob = new Blob([data], { type: 'text/plain;charset=utf-8' });
+      saveAs(blob, 'cashlinks.txt');
     }
 
     onMounted(async () => {
@@ -85,7 +118,7 @@ export default defineComponent({
       await fundCashlinks();
     });
 
-    return { cashlinksWithStatus };
+    return { cashlinksWithStatus, handleSave };
   },
 });
 </script>

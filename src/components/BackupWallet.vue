@@ -1,18 +1,25 @@
 <template>
-  <div>
-    <h2 class="text-lg font-bold mb-4">Backup temporary wallet</h2>
-    <div>
-      <p>Address: {{ address }}</p>
-      <p>Backup words: {{ backupWords }}</p>
-
-      <div class="mt-6">
-        <button
-          class="justify-center py-2 px-4 text-white bg-indigo-800 hover:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          type="button"
-          @click="handleNext"
-        >
-          Next
-        </button>
+  <div class="flex justify-center">
+    <div class="nq-card">
+      <div class="nq-card-header">
+        <h2 class="nq-h1">Backup temporary wallet</h2>
+      </div>
+      <div class="nq-card-body">
+        <p class="nq-text">
+          You will need to transfer funds to a temporary wallet, in case something goes wrong, please backup the
+          recovery words.
+        </p>
+        <div class="mt-16">
+          <p class="nq-label">Address</p>
+          <p class="mt-2">{{ address }}</p>
+        </div>
+        <div class="mt-12">
+          <p class="nq-label">Recovery Words</p>
+          <p class="mt-2">{{ backupWords }}</p>
+        </div>
+      </div>
+      <div class="nq-card-footer">
+        <button class="nq-button light-blue" @click="handleNext">Continue</button>
       </div>
     </div>
   </div>
@@ -37,9 +44,7 @@ export default defineComponent({
       wallet = Nimiq.Wallet.generate();
 
       address.value = wallet.address.toUserFriendlyAddress();
-      backupWords.value = Nimiq.MnemonicUtils.entropyToMnemonic(
-        wallet.keyPair.privateKey.serialize()
-      ).join(' ');
+      backupWords.value = Nimiq.MnemonicUtils.entropyToMnemonic(wallet.keyPair.privateKey.serialize()).join(' ');
 
       console.log('new wallet', address.value, backupWords.value);
 

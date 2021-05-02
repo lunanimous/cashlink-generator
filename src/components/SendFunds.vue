@@ -1,21 +1,24 @@
 <template>
-  <div>
-    <h2 class="text-lg font-bold mb-4">Send funds</h2>
-    <div>
-      <p>Temporary address to fund: {{ address }}</p>
-      <p>Total funding required: {{ total / 1e5 }} NIM</p>
-
-      <div class="mt-6">
-        <button
-          v-if="!isWaitingForPayment"
-          class="justify-center py-2 px-4 text-white bg-indigo-800 hover:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          type="button"
-          @click="handlePay"
-        >
-          Pay
-        </button>
-        <p v-if="isWaitingForPayment">
-          Waiting for payment, this can take up to a minute...
+  <div class="flex justify-center">
+    <div class="nq-card">
+      <div class="nq-card-header">
+        <h2 class="nq-h1">Send funds</h2>
+      </div>
+      <div class="nq-card-body">
+        <p class="nq-text">Now please send the funds to the temporary wallet.</p>
+        <div class="mt-16">
+          <p class="nq-label">Address</p>
+          <p class="mt-2">{{ address }}</p>
+        </div>
+        <div class="mt-12">
+          <p class="nq-label">Total funds to send</p>
+          <p class="mt-2">{{ total / 1e5 }} NIM</p>
+        </div>
+      </div>
+      <div class="nq-card-footer">
+        <button v-if="!isWaitingForPayment" class="nq-button light-blue" @click="handlePay">Pay</button>
+        <p v-if="isWaitingForPayment" class="p-12 nq-notice warning">
+          Waiting for payment to be mined, this can take up to a minute...
         </p>
       </div>
     </div>
@@ -51,11 +54,7 @@ export default defineComponent({
 
     const total = computed(() => {
       console.log(config.value);
-      const {
-        numberOfCashlinks,
-        amountPerCashlink,
-        feePerCashlink,
-      } = config.value;
+      const { numberOfCashlinks, amountPerCashlink, feePerCashlink } = config.value;
 
       return numberOfCashlinks * (amountPerCashlink + feePerCashlink);
     });

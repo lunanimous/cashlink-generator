@@ -1,6 +1,6 @@
 <template>
   <div class="lg:flex">
-    <div class="flex items-center text-center mb-24 lg:text-left lg:ml-16 lg:order-last">
+    <div class="flex items-center text-center mb-24 lg:text-left lg:ml-24 lg:order-last">
       <div>
         <h1 class="font-bold text-8xl mb-6">Generate cashlinks</h1>
         <p class="text-6xl leading-tight mb-2">Easily generate multiple cashlinks for contests, giveaways or events</p>
@@ -12,7 +12,7 @@
     <div class="configure-card nq-card flex-shrink-0">
       <form @submit.prevent="handleSubmit">
         <div class="nq-card-header">
-          <h2 class="nq-h2">Configure Cashlinks</h2>
+          <h2 class="nq-h1">Configure Cashlinks</h2>
         </div>
         <div class="nq-card-body">
           <label class="block mb-4">
@@ -88,7 +88,7 @@ export default defineComponent({
 
 <style scoped>
 .configure-card {
-  width: 42rem;
+  width: 48rem;
   margin-left: auto;
   margin-right: auto;
 }
