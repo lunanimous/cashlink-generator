@@ -21,6 +21,7 @@
     />
     <generate-cashlinks
       v-if="step == Steps.Generate"
+      :config="cashlinkConfig"
       :wallet="temporaryWallet"
     />
   </main>

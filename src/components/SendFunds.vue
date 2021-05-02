@@ -57,11 +57,10 @@ export default defineComponent({
         feePerCashlink,
       } = config.value;
 
-      return numberOfCashlinks * (amountPerCashlink * 1e5 + feePerCashlink);
+      return numberOfCashlinks * (amountPerCashlink + feePerCashlink);
     });
 
     const transactionListener = (transaction: ClientTransactionDetails) => {
-      const temporaryWallet: Wallet = wallet.value;
       console.log(transaction);
       if (transaction.state !== 'mined') {
         return;
@@ -88,7 +87,7 @@ export default defineComponent({
       };
 
       try {
-        const transaction = await hubApi().checkout(options);
+        await hubApi().checkout(options);
         isWaitingForPayment.value = true;
       } catch {
         isWaitingForPayment.value = false;

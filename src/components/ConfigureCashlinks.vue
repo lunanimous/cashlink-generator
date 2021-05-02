@@ -60,9 +60,9 @@ export default defineComponent({
 
     function handleSubmit() {
       const payload = {
-        numberOfCashlinks: numberOfCashlinks.value,
-        amountPerCashlink: amountPerCashlink.value,
-        feePerCashlink: feePerCashlink.value,
+        numberOfCashlinks: Number(numberOfCashlinks.value),
+        amountPerCashlink: Number(amountPerCashlink.value * 1e5),
+        feePerCashlink: Number(feePerCashlink.value),
       };
 
       console.log(payload);
