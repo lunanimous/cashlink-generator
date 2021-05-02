@@ -34,7 +34,7 @@
           </p>
         </div>
         <div class="nq-card-footer">
-          <button class="nq-button light-blue" type="submit">Continue</button>
+          <button class="nq-button light-blue" type="submit" :disabled="!isValid">Continue</button>
         </div>
       </form>
     </div>
@@ -48,11 +48,19 @@ export default defineComponent({
   emits: ['configure'],
   setup(_, { emit }) {
     const numberOfCashlinks = ref(1);
-    const amountPerCashlink = ref(1);
+    const amountPerCashlink = ref(10);
     const feePerCashlink = ref(1);
 
     const total = computed(() => {
       return numberOfCashlinks.value * (amountPerCashlink.value * 1e5 + feePerCashlink.value);
+    });
+
+    const isValid = computed(() => {
+      const number = Number(numberOfCashlinks.value);
+      const amount = Number(amountPerCashlink.value);
+      const fee = Number(feePerCashlink.value);
+
+      return number > 0 && number < 100 && amount >= 10 && fee >= 0;
     });
 
     function handleSubmit() {
@@ -71,6 +79,7 @@ export default defineComponent({
       amountPerCashlink,
       feePerCashlink,
       total,
+      isValid,
       handleSubmit,
     };
   },

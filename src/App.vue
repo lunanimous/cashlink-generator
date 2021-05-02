@@ -4,7 +4,7 @@
     <p class="nq-notice info text-right">Consensus: {{ networkStatus }}</p>
   </div>
 
-  <main class="flex container mx-auto p-12 pt-48 justify-center">
+  <main class="flex container mx-auto p-12 pt-24 md:pt-48 justify-center">
     <configure-cashlinks v-if="step == Steps.Configure" @configure="handleConfigure" />
     <backup-wallet v-if="step == Steps.Backup" @walletCreate="handleWalletCreate" />
     <send-funds
