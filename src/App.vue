@@ -1,29 +1,19 @@
 <template>
-  <div class="p-12 flex justify-between">
-    <h1 class="text-xl" @click="step = Steps.Configure">Cashlink Generator</h1>
-    <p>Consensus: {{ networkStatus }}</p>
+  <div class="flex px-12 items-center justify-between">
+    <h1 class="nq-h2" @click="step = Steps.Configure">Cashlink Generator</h1>
+    <p class="nq-notice info text-right">Consensus: {{ networkStatus }}</p>
   </div>
 
-  <main class="container mx-auto p-12 shadow-2xl bg-white rounded-lg">
-    <configure-cashlinks
-      v-if="step == Steps.Configure"
-      @configure="handleConfigure"
-    />
-    <backup-wallet
-      v-if="step == Steps.Backup"
-      @walletCreate="handleWalletCreate"
-    />
+  <main class="flex container mx-auto p-12 pt-48 justify-center">
+    <configure-cashlinks v-if="step == Steps.Configure" @configure="handleConfigure" />
+    <backup-wallet v-if="step == Steps.Backup" @walletCreate="handleWalletCreate" />
     <send-funds
       v-if="step == Steps.Send"
       :config="cashlinkConfig"
       :wallet="temporaryWallet"
       @walletFunded="handleWalletFund"
     />
-    <generate-cashlinks
-      v-if="step == Steps.Generate"
-      :config="cashlinkConfig"
-      :wallet="temporaryWallet"
-    />
+    <generate-cashlinks v-if="step == Steps.Generate" :config="cashlinkConfig" :wallet="temporaryWallet" />
   </main>
 </template>
 

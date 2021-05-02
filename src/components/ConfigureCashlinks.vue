@@ -1,43 +1,43 @@
 <template>
-  <div>
-    <h2 class="text-lg font-bold mb-4">Configure your cashlinks</h2>
-    <form class="grid grid-cols-1 gap-6" @submit.prevent="handleSubmit">
-      <label class="block">
-        <span>Number of cashlinks</span>
-        <input
-          v-model="numberOfCashlinks"
-          class="mt-1 block w-full"
-          type="number"
-        />
-      </label>
-      <label class="block">
-        <span>Amount for each cashlink (in NIM)</span>
-        <input
-          v-model="amountPerCashlink"
-          class="mt-1 block w-full"
-          type="number"
-        />
-      </label>
-      <label class="block">
-        <span>Fee for each cashlink (in LUNA)</span>
-        <input
-          v-model="feePerCashlink"
-          class="mt-1 block w-full"
-          type="number"
-        />
-      </label>
-
-      <p>Total funds required: {{ total / 1e5 }} NIM</p>
-
+  <div class="lg:flex">
+    <div class="flex items-center text-center mb-24 lg:text-left lg:ml-16 lg:order-last">
       <div>
-        <button
-          class="justify-center py-2 px-4 text-white bg-indigo-800 hover:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          type="submit"
-        >
-          Next
-        </button>
+        <h1 class="font-bold text-8xl mb-6">Generate cashlinks</h1>
+        <p class="text-6xl leading-tight mb-2">Easily generate multiple cashlinks for contests, giveaways or events</p>
+        <p class="text-5xl leading-tight text-gray-500">
+          Get started by choosing the number of cashlinks and an amount
+        </p>
       </div>
-    </form>
+    </div>
+    <div class="configure-card nq-card flex-shrink-0">
+      <form @submit.prevent="handleSubmit">
+        <div class="nq-card-header">
+          <h2 class="nq-h2">Configure Cashlinks</h2>
+        </div>
+        <div class="nq-card-body">
+          <label class="block mb-4">
+            <span class="nq-label">Number of cashlinks</span>
+            <input v-model="numberOfCashlinks" class="nq-input block w-full mt-2" type="number" />
+          </label>
+          <label class="block mb-4">
+            <span class="nq-label">Amount in NIM per cashlink</span>
+            <input v-model="amountPerCashlink" class="nq-input block w-full mt-2" type="number" />
+          </label>
+          <label class="block mb-6">
+            <span class="nq-label">Fee in LUNA per cashlink</span>
+            <input v-model="feePerCashlink" class="nq-input block w-full mt-2" type="number" />
+          </label>
+
+          <p class="nq-notice info">
+            <span class="nq-text">Total: </span>
+            <span class="text-4xl">{{ total / 1e5 }} NIM</span>
+          </p>
+        </div>
+        <div class="nq-card-footer">
+          <button class="nq-button light-blue" type="submit">Continue</button>
+        </div>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -52,10 +52,7 @@ export default defineComponent({
     const feePerCashlink = ref(1);
 
     const total = computed(() => {
-      return (
-        numberOfCashlinks.value *
-        (amountPerCashlink.value * 1e5 + feePerCashlink.value)
-      );
+      return numberOfCashlinks.value * (amountPerCashlink.value * 1e5 + feePerCashlink.value);
     });
 
     function handleSubmit() {
@@ -79,3 +76,11 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.configure-card {
+  width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
