@@ -44,6 +44,7 @@ export default defineComponent({
       wallet = Nimiq.Wallet.generate();
 
       address.value = wallet.address.toUserFriendlyAddress();
+      console.log(wallet.address.toUserFriendlyAddress(), wallet.keyPair.publicKey.toAddress().toUserFriendlyAddress());
       backupWords.value = Nimiq.MnemonicUtils.entropyToMnemonic(wallet.keyPair.privateKey.serialize()).join(' ');
 
       console.log('new wallet', address.value, backupWords.value);

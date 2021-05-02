@@ -60,7 +60,7 @@ export default defineComponent({
       const amount = Number(amountPerCashlink.value);
       const fee = Number(feePerCashlink.value);
 
-      return number > 0 && number < 100 && amount >= 10 && fee >= 0;
+      return number > 0 && number < 100 && amount >= 10 && fee >= 1;
     });
 
     function handleSubmit() {

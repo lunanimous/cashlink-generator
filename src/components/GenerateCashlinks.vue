@@ -8,16 +8,16 @@
         <p class="nq-text">Please find below the generated cashlinks, make sure to copy or download them.</p>
 
         <p v-if="!cashlinksWithStatus" class="nq-notice warning">Generating cashlinks..</p>
-        <button @click="handleSave" class="nq-button-pill light-blue" type="button">Download all cashlinks</button>
+        <button @click="handleSave" class="nq-button-pill light-blue mb-8" type="button">Download all cashlinks</button>
 
         <div
           v-for="(cashlink, index) in cashlinksWithStatus"
           :key="index"
-          class="mt-12 flex items-center justify-between"
+          class="mt-4 flex items-center justify-between border-t-2 pt-4"
         >
           <div class="flex-1">
             <p></p>
-            <a class="nq-link" :href="cashlink.url" target="__blank">Cashlink {{ index }}</a>
+            <a class="nq-link" :href="cashlink.url" target="__blank">Cashlink {{ index + 1 }}</a>
           </div>
           <div class="">
             <p

@@ -4,17 +4,29 @@
     <p class="nq-notice info text-right">Consensus: {{ networkStatus }}</p>
   </div>
 
-  <main class="flex container mx-auto p-12 pt-24 md:pt-48 justify-center">
-    <configure-cashlinks v-if="step == Steps.Configure" @configure="handleConfigure" />
-    <backup-wallet v-if="step == Steps.Backup" @walletCreate="handleWalletCreate" />
-    <send-funds
-      v-if="step == Steps.Send"
-      :config="cashlinkConfig"
-      :wallet="temporaryWallet"
-      @walletFunded="handleWalletFund"
-    />
-    <generate-cashlinks v-if="step == Steps.Generate" :config="cashlinkConfig" :wallet="temporaryWallet" />
-  </main>
+  <div class="flex-1">
+    <main class="flex container mx-auto p-12 pt-24 md:pt-48 justify-center">
+      <configure-cashlinks v-if="step == Steps.Configure" @configure="handleConfigure" />
+      <backup-wallet v-if="step == Steps.Backup" @walletCreate="handleWalletCreate" />
+      <send-funds
+        v-if="step == Steps.Send"
+        :config="cashlinkConfig"
+        :wallet="temporaryWallet"
+        @walletFunded="handleWalletFund"
+      />
+      <generate-cashlinks v-if="step == Steps.Generate" :config="cashlinkConfig" :wallet="temporaryWallet" />
+    </main>
+  </div>
+
+  <footer class="p-4 text-center">
+    <p class="nq-notice">
+      If you find this project useful, please consider
+      <a class="nq-link" href="https://wallet.nimiq.com/nimiq:NQ54EHLNL135RBFU305P0GJTGTU0S3G38MKJ" target="__blank"
+        >donating</a
+      >
+      or join me on <a class="nq-link" href="https://r.upland.me/3kwq" target="__blank">Upland</a>
+    </p>
+  </footer>
 </template>
 
 <script lang="ts">
