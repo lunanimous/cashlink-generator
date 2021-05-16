@@ -3,5 +3,5 @@
 @tailwind utilities;
 
 main {
-  max-width: 1280px !important;
+  max-width: 960px !important;
 }

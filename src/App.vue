@@ -1,11 +1,14 @@
 <template>
   <div class="flex px-12 items-center justify-between">
-    <h1 class="nq-h2" @click="step = Steps.Configure">Cashlink Generator</h1>
+    <div @click="step = Steps.Configure" class="flex items-center cursor-pointer">
+      <img src="./assets/logo.png" alt="Cashlink Generator" class="mr-4" />
+      <h1 class="nq-h2">Cashlink Generator</h1>
+    </div>
     <p class="nq-notice info text-right">Consensus: {{ networkStatus }}</p>
   </div>
 
   <div class="flex-1">
-    <main class="flex container mx-auto p-12 pt-24 md:pt-48 justify-center">
+    <main class="flex mx-auto p-12 pt-24 md:pt-48 justify-center">
       <configure-cashlinks v-if="step == Steps.Configure" @configure="handleConfigure" />
       <backup-wallet v-if="step == Steps.Backup" @walletCreate="handleWalletCreate" />
       <send-funds
