@@ -7,11 +7,11 @@
       <div class="nq-card-body">
         <p class="nq-text">Please find below the generated cashlinks, make sure to copy or download them.</p>
 
-        <p v-if="!cashlinksWithStatus" class="nq-notice warning">Generating cashlinks..</p>
+        <p v-if="!displayCashlinks" class="nq-notice warning">Generating cashlinks..</p>
         <button @click="handleSave" class="nq-button-pill light-blue mb-8" type="button">Download all cashlinks</button>
 
         <div
-          v-for="(cashlink, index) in cashlinksWithStatus"
+          v-for="(cashlink, index) in displayCashlinks"
           :key="index"
           class="mt-4 flex items-center justify-between border-t-2 pt-4"
         >
@@ -21,13 +21,19 @@
           </div>
           <div class="">
             <p
-              v-if="cashlink.status == 0"
+              v-if="cashlink.status == CashlinkStatus.New"
               class="inline-block rounded-lg text-3xl bg-gray-100 p-4 text-gray-400 font-bold"
+            >
+              New
+            </p>
+            <p
+              v-if="cashlink.status == CashlinkStatus.Pending"
+              class="inline-block rounded-lg text-3xl bg-yellow-100 p-4 text-yellow-700 font-bold"
             >
               Pending
             </p>
             <p
-              v-if="cashlink.status == 1"
+              v-if="cashlink.status == CashlinkStatus.Funded"
               class="inline-block rounded-lg text-3xl bg-green-100 p-4 text-green-500 font-bold"
             >
               Funded
@@ -40,14 +46,26 @@
 </template>
 
 <script lang="ts">
-import { Wallet } from '@nimiq/core-web';
-import { computed, defineComponent, onMounted, Ref, ref, toRefs } from 'vue';
+import { Client, ClientTransactionDetails, Hash, Wallet } from '@nimiq/core-web';
+import { computed, defineComponent, onMounted, onUnmounted, Ref, ref, toRefs } from 'vue';
 import { saveAs } from 'file-saver';
 import { Cashlink } from '../lib/Cashlink';
 import { connect } from '../lib/NetworkClient';
 import { CashlinkConfig } from '../types';
 
 const NIMIQ_HUB_URL = String(import.meta.env.VITE_NIMIQ_HUB_URL);
+
+enum CashlinkStatus {
+  New,
+  Pending,
+  Funded,
+}
+
+interface CashlinkInfo {
+  cashlink: Cashlink;
+  status: CashlinkStatus;
+  transactionHash?: Hash;
+}
 
 export default defineComponent({
   props: {
@@ -62,17 +80,14 @@ export default defineComponent({
   },
   setup(props) {
     const { wallet, config } = toRefs(props);
-    const cashlinks: Ref<Cashlink[]> = ref([]);
-    const cashlinkStatuses: Ref<any[]> = ref([]);
+    const cashlinkInfos: Ref<CashlinkInfo[]> = ref([]);
 
-    const cashlinksWithStatus = computed(() => {
-      if (!cashlinks) {
+    const displayCashlinks = computed(() => {
+      if (!cashlinkInfos) {
         return [];
       }
 
-      return cashlinks.value.map((cashlink: Cashlink, index: number) => {
-        const statuses = cashlinkStatuses.value;
-        const status = statuses[index] ? statuses[index] : 0;
+      return cashlinkInfos.value.map(({ cashlink, status }) => {
         return {
           url: `${NIMIQ_HUB_URL}/cashlink/#${cashlink.render()}`,
           status: status,
@@ -80,28 +95,63 @@ export default defineComponent({
       });
     });
 
+    let client: Client;
+    let listenerHandle: number;
+
+    const transactionListener = (transaction: ClientTransactionDetails) => {
+      if (transaction.state !== 'mined') {
+        return;
+      }
+
+      const index = cashlinkInfos.value.findIndex((needle) => {
+        return needle.transactionHash?.equals(transaction.transactionHash);
+      });
+
+      if (index === -1) {
+        return;
+      }
+
+      const oldCashlinkInfo = cashlinkInfos.value[index];
+      cashlinkInfos.value.splice(index, 1, {
+        ...oldCashlinkInfo,
+        status: CashlinkStatus.Funded,
+      });
+
+      console.log(transaction);
+    };
+
     async function generateCashlinks() {
       const generatedCashlinks = [];
+
       for (let i = 0; i < config.value.numberOfCashlinks; i++) {
         const cashlink = await Cashlink.create(config.value.amountPerCashlink);
-        generatedCashlinks.push(cashlink);
+        const cashlinkInfo: CashlinkInfo = {
+          cashlink,
+          status: CashlinkStatus.New,
+        };
+
+        generatedCashlinks.push(cashlinkInfo);
       }
-      cashlinks.value = generatedCashlinks;
-      cashlinkStatuses.value = Array(generatedCashlinks.length);
+
+      cashlinkInfos.value = generatedCashlinks;
+
+      // watch cashlink addresses for transactions to update status
+      client = await connect();
+      const addresses = generatedCashlinks.map(({ cashlink }) => cashlink.address);
+      console.log(addresses);
+      listenerHandle = await client.addTransactionListener(transactionListener, addresses);
     }
 
     async function fundCashlinks() {
-      const client = await connect();
-      for (let i = 0; i < cashlinks.value.length; i++) {
-        const cashlink = cashlinks.value[i];
+      client = await connect();
+      for (let i = 0; i < cashlinkInfos.value.length; i++) {
+        const cashlinkInfo = cashlinkInfos.value[i];
 
         const sender = wallet.value.address;
-        const recipient = cashlink.address;
+        const recipient = cashlinkInfo.cashlink.address;
         const amount = config.value.amountPerCashlink;
         const fee = config.value.feePerCashlink;
         const data = new Uint8Array([0, 130, 128, 146, 135]); // 'CASH'.split('').map(c => c.charCodeAt(0) + 63)
-
-        // const transaction = wallet.value.createTransaction(address, amount, fee);
 
         const transaction = new Nimiq.ExtendedTransaction(
           sender,
@@ -118,14 +168,21 @@ export default defineComponent({
         const proof = wallet.value.signTransaction(transaction);
         transaction.proof = proof.serialize();
 
-        await client.sendTransaction(transaction);
-        cashlinkStatuses.value.splice(i, 1, 1);
+        const transactionDetails = await client.sendTransaction(transaction);
+
+        const updatedCashlinkInfo: CashlinkInfo = {
+          cashlink: cashlinkInfo.cashlink,
+          status: CashlinkStatus.Pending,
+          transactionHash: transactionDetails.transactionHash,
+        };
+
+        cashlinkInfos.value.splice(i, 1, updatedCashlinkInfo);
       }
     }
 
     function handleSave() {
       console.log('save');
-      const lines = cashlinksWithStatus.value.map((cashlink) => cashlink.url);
+      const lines = displayCashlinks.value.map((cashlink) => cashlink.url);
       const data = lines.join('\r\n');
       const blob = new Blob([data], { type: 'text/plain;charset=utf-8' });
       saveAs(blob, 'cashlinks.txt');
@@ -136,7 +193,13 @@ export default defineComponent({
       await fundCashlinks();
     });
 
-    return { cashlinksWithStatus, handleSave };
+    onUnmounted(() => {
+      if (client && listenerHandle) {
+        client.removeListener(listenerHandle);
+      }
+    });
+
+    return { CashlinkStatus, displayCashlinks, handleSave };
   },
 });
 </script>

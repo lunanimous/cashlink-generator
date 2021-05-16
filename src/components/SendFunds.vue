@@ -26,9 +26,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref, toRefs } from 'vue';
+import { computed, defineComponent, onBeforeUnmount, onDeactivated, onMounted, onUnmounted, ref, toRefs } from 'vue';
 import { connect, hubApi } from '../lib/NetworkClient';
-import { ClientTransactionDetails, Transaction, Wallet } from '@nimiq/core-web';
+import { Client, ClientTransactionDetails, Transaction, Wallet } from '@nimiq/core-web';
 import { CashlinkConfig } from '../types';
 
 export default defineComponent({
@@ -45,7 +45,6 @@ export default defineComponent({
   emits: ['walletFunded'],
   setup(props, { emit }) {
     const { config, wallet } = toRefs(props);
-
     const isWaitingForPayment = ref(false);
 
     const address = computed(() => {
@@ -58,6 +57,9 @@ export default defineComponent({
 
       return numberOfCashlinks * (amountPerCashlink + feePerCashlink);
     });
+
+    let client: Client;
+    let listenerHandle: number;
 
     const transactionListener = (transaction: ClientTransactionDetails) => {
       console.log(transaction);
@@ -94,8 +96,14 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      const client = await connect();
-      client.addTransactionListener(transactionListener, [address.value]);
+      client = await connect();
+      listenerHandle = await client.addTransactionListener(transactionListener, [address.value]);
+    });
+
+    onUnmounted(() => {
+      if (client && listenerHandle) {
+        client.removeListener(listenerHandle);
+      }
     });
 
     return {
