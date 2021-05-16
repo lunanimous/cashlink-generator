@@ -95,11 +95,29 @@ export default defineComponent({
       for (let i = 0; i < cashlinks.value.length; i++) {
         const cashlink = cashlinks.value[i];
 
-        const address = cashlink.address;
+        const sender = wallet.value.address;
+        const recipient = cashlink.address;
         const amount = config.value.amountPerCashlink;
         const fee = config.value.feePerCashlink;
+        const data = new Uint8Array([0, 130, 128, 146, 135]); // 'CASH'.split('').map(c => c.charCodeAt(0) + 63)
 
-        const transaction = wallet.value.createTransaction(address, amount, fee, await client.getHeadHeight());
+        // const transaction = wallet.value.createTransaction(address, amount, fee);
+
+        const transaction = new Nimiq.ExtendedTransaction(
+          sender,
+          Nimiq.Account.Type.BASIC,
+          recipient,
+          Nimiq.Account.Type.BASIC,
+          amount,
+          fee,
+          await client.getHeadHeight(),
+          Nimiq.Transaction.Flag.NONE,
+          data
+        );
+
+        const proof = wallet.value.signTransaction(transaction);
+        transaction.proof = proof.serialize();
+
         await client.sendTransaction(transaction);
         cashlinkStatuses.value.splice(i, 1, 1);
       }

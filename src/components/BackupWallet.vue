@@ -41,13 +41,16 @@ export default defineComponent({
 
     async function getFundingAddress() {
       const Nimiq = await loadNimiq();
-      wallet = Nimiq.Wallet.generate();
+      const entropy = Nimiq.Entropy.generate();
+      const mnemonic = entropy.toMnemonic();
+      const master = entropy.toExtendedPrivateKey('');
+      const accountZeroWalletZero = master.derivePath("m/44'/242'/0'/0'");
 
-      address.value = wallet.address.toUserFriendlyAddress();
-      console.log(wallet.address.toUserFriendlyAddress(), wallet.keyPair.publicKey.toAddress().toUserFriendlyAddress());
-      backupWords.value = Nimiq.MnemonicUtils.entropyToMnemonic(wallet.keyPair.privateKey.serialize()).join(' ');
+      address.value = accountZeroWalletZero.toAddress().toUserFriendlyAddress();
+      backupWords.value = mnemonic.join(' ');
 
-      console.log('new wallet', address.value, backupWords.value);
+      const keyPair = Nimiq.KeyPair.derive(accountZeroWalletZero.privateKey);
+      wallet = new Nimiq.Wallet(keyPair);
 
       const client = await connect();
       await client.waitForConsensusEstablished();

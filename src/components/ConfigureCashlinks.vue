@@ -1,9 +1,9 @@
 <template>
   <div class="lg:flex">
-    <div class="flex items-center text-center mb-24 lg:text-left lg:ml-24 lg:order-last">
+    <div class="flex items-center text-center mb-24 lg:mb-0 lg:text-left lg:ml-24 lg:order-last">
       <div>
         <h1 class="font-bold text-8xl mb-6">Generate cashlinks</h1>
-        <p class="text-6xl leading-tight mb-2">Easily generate multiple cashlinks for contests, giveaways or events</p>
+        <p class="text-6xl leading-tight mb-16">Easily generate multiple cashlinks for contests, giveaways or events</p>
         <p class="text-5xl leading-tight text-gray-500">
           Get started by choosing the number of cashlinks and an amount
         </p>
