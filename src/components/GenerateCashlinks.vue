@@ -136,14 +136,12 @@ export default defineComponent({
       cashlinkInfos.value = generatedCashlinks;
 
       // watch cashlink addresses for transactions to update status
-      client = await connect();
       const addresses = generatedCashlinks.map(({ cashlink }) => cashlink.address);
       console.log(addresses);
       listenerHandle = await client.addTransactionListener(transactionListener, addresses);
     }
 
     async function fundCashlinks() {
-      client = await connect();
       for (let i = 0; i < cashlinkInfos.value.length; i++) {
         const cashlinkInfo = cashlinkInfos.value[i];
 
@@ -169,6 +167,7 @@ export default defineComponent({
         transaction.proof = proof.serialize();
 
         const transactionDetails = await client.sendTransaction(transaction);
+        console.log(i, transactionDetails);
 
         const updatedCashlinkInfo: CashlinkInfo = {
           cashlink: cashlinkInfo.cashlink,
@@ -189,6 +188,7 @@ export default defineComponent({
     }
 
     onMounted(async () => {
+      client = await connect();
       await generateCashlinks();
       await fundCashlinks();
     });
