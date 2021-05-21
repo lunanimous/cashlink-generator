@@ -20,9 +20,10 @@
 
         <div v-if="isWaitingForPayment" class="p-12">
           <p class="nq-notice warning">Waiting for payment to be mined, this can take up to a minute...</p>
+          <button v-if="isLongRunning" class="mt-8 nq-button-pill light-blue" @click="handleManualCheck">
+            Check manually
+          </button>
         </div>
-
-        <button class="mt-8 nq-button light-blue" @click="handleManualCheck">Check manually</button>
       </div>
     </div>
   </div>
@@ -50,6 +51,9 @@ export default defineComponent({
   setup(props, { emit }) {
     const { config, wallet } = toRefs(props);
     const isWaitingForPayment = ref(false);
+    const isLongRunning = ref(false);
+
+    let longRunningTimeout: number;
 
     const address = computed(() => {
       return wallet.value.address.toUserFriendlyAddress();
@@ -93,6 +97,10 @@ export default defineComponent({
 
       try {
         await hubApi().checkout(options);
+        longRunningTimeout = setTimeout(() => {
+          isLongRunning.value = true;
+        }, 10 * 1000);
+
         isWaitingForPayment.value = true;
       } catch {
         isWaitingForPayment.value = false;
@@ -117,12 +125,17 @@ export default defineComponent({
       if (client && listenerHandle) {
         client.removeListener(listenerHandle);
       }
+
+      if (longRunningTimeout) {
+        clearTimeout(longRunningTimeout);
+      }
     });
 
     return {
       address,
       total,
       isWaitingForPayment,
+      isLongRunning,
       handlePay,
       handleManualCheck,
     };
