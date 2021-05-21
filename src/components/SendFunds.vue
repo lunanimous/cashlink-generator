@@ -60,7 +60,6 @@ export default defineComponent({
     });
 
     const total = computed(() => {
-      console.log(config.value);
       const { numberOfCashlinks, amountPerCashlink, feePerCashlink } = config.value;
 
       return numberOfCashlinks * (amountPerCashlink + feePerCashlink);
@@ -70,7 +69,6 @@ export default defineComponent({
     let listenerHandle: number;
 
     const transactionListener = (transaction: ClientTransactionDetails) => {
-      console.log(transaction);
       if (transaction.state !== 'mined') {
         return;
       }
@@ -84,7 +82,6 @@ export default defineComponent({
         return;
       }
 
-      console.log('payment received, ready to generate');
       emit('walletFunded');
     };
 
@@ -99,7 +96,7 @@ export default defineComponent({
         await hubApi().checkout(options);
         longRunningTimeout = setTimeout(() => {
           isLongRunning.value = true;
-        }, 10 * 1000);
+        }, 60 * 1000);
 
         isWaitingForPayment.value = true;
       } catch {
@@ -110,7 +107,6 @@ export default defineComponent({
     async function handleManualCheck() {
       const tempAccount = await client.getAccount(wallet.value.address);
 
-      console.log(tempAccount, total.value);
       if (tempAccount.balance >= total.value) {
         emit('walletFunded');
       }

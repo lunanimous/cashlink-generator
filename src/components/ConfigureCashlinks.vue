@@ -114,7 +114,6 @@ export default defineComponent({
         feePerCashlink: Number(feePerByte.value * Cashlink.SIZE),
       };
 
-      console.log(payload);
       emit('configure', payload);
     }
 

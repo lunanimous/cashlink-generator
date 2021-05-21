@@ -60,7 +60,7 @@ export default defineComponent({
   setup() {
     const step = ref(Steps.Configure);
     const networkStatus = ref('loading');
-    const cashlinkConfig = ref({});
+    const cashlinkConfig = ref();
     const temporaryWallet = ref();
 
     async function start() {
@@ -73,17 +73,15 @@ export default defineComponent({
 
     const handleConfigure = (config: CashlinkConfig) => {
       cashlinkConfig.value = config;
-      console.log(config);
       step.value = Steps.Backup;
     };
 
-    const handleWalletCreate = ({ wallet }) => {
+    const handleWalletCreate = ({ wallet }: { wallet: Nimiq.Wallet }) => {
       temporaryWallet.value = wallet;
       step.value = Steps.Send;
     };
 
     const handleWalletFund = () => {
-      console.log('wallet funded');
       step.value = Steps.Generate;
     };
 

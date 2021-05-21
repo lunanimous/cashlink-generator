@@ -5,7 +5,7 @@ import { loadNimiq } from './CoreLoader';
 const NIMIQ_HUB_URL = String(import.meta.env.VITE_NIMIQ_HUB_URL);
 
 let _networkClient: Promise<Client> | null = null;
-let _hubApi: HubApi = null;
+let _hubApi: HubApi | null = null;
 
 export async function connect(): Promise<Client> {
   _networkClient =

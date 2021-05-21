@@ -117,8 +117,6 @@ export default defineComponent({
         ...oldCashlinkInfo,
         status: CashlinkStatus.Funded,
       });
-
-      console.log(transaction);
     };
 
     async function generateCashlinks() {
@@ -138,7 +136,6 @@ export default defineComponent({
 
       // watch cashlink addresses for transactions to update status
       const addresses = generatedCashlinks.map(({ cashlink }) => cashlink.address);
-      console.log(addresses);
       listenerHandle = await client.addTransactionListener(transactionListener, addresses);
     }
 
@@ -169,7 +166,6 @@ export default defineComponent({
         transaction.proof = proof.serialize();
 
         const transactionDetails = await client.sendTransaction(transaction);
-        console.log(i, transactionDetails);
 
         const updatedCashlinkInfo: CashlinkInfo = {
           cashlink: cashlinkInfo.cashlink,
@@ -182,7 +178,6 @@ export default defineComponent({
     }
 
     function handleSave() {
-      console.log('save');
       const lines = displayCashlinks.value.map((cashlink) => cashlink.url);
       const data = lines.join('\r\n');
       const blob = new Blob([data], { type: 'text/plain;charset=utf-8' });
