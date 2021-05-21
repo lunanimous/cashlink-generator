@@ -5,7 +5,8 @@
         <h2 class="nq-h1">Cashlinks</h2>
       </div>
       <div class="nq-card-body">
-        <p class="nq-text">Please find below the generated cashlinks, make sure to copy or download them.</p>
+        <p class="nq-notice info">Please find below the generated cashlinks, make sure to copy or download them.</p>
+        <p class="nq-text">It can take a couple minutes until all cashlinks are generated and funded.</p>
 
         <p v-if="!displayCashlinks" class="nq-notice warning">Generating cashlinks..</p>
         <button @click="handleSave" class="nq-button-pill light-blue mb-8" type="button">Download all cashlinks</button>
