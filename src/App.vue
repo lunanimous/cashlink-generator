@@ -2,7 +2,7 @@
   <div class="flex px-12 items-center justify-between">
     <div @click="step = Steps.Configure" class="flex items-center cursor-pointer">
       <img src="./assets/logo.png" alt="Cashlink Generator" class="mr-4 rounded-md" />
-      <h1 class="nq-h2">Cashlink Generator</h1>
+      <h1 class="nq-h2">Nimiq Cashlink Generator</h1>
     </div>
     <p class="nq-notice info text-right">Consensus: {{ networkStatus }}</p>
   </div>
