@@ -124,7 +124,7 @@ export default defineComponent({
       const generatedCashlinks = [];
 
       for (let i = 0; i < config.value.numberOfCashlinks; i++) {
-        const cashlink = await Cashlink.create(config.value.amountPerCashlink);
+        const cashlink = await Cashlink.create(config.value.amountPerCashlink, config.value.feePerCashlink);
         const cashlinkInfo: CashlinkInfo = {
           cashlink,
           status: CashlinkStatus.New,
@@ -146,10 +146,11 @@ export default defineComponent({
         const cashlinkInfo = cashlinkInfos.value[i];
 
         const sender = wallet.value.address;
+
         const recipient = cashlinkInfo.cashlink.address;
-        const amount = config.value.amountPerCashlink;
-        const fee = config.value.feePerCashlink;
-        const data = new Uint8Array([0, 130, 128, 146, 135]); // 'CASH'.split('').map(c => c.charCodeAt(0) + 63)
+        const amount = cashlinkInfo.cashlink.value;
+        const fee = cashlinkInfo.cashlink.fee;
+        const data = Cashlink.FUNDING_DATA;
 
         const transaction = new Nimiq.ExtendedTransaction(
           sender,

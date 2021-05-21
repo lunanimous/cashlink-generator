@@ -26,8 +26,8 @@
           </label>
           <p class="nq-notice warning">{{ amountErrorMessage }}</p>
           <label class="block mt-4">
-            <span class="nq-label">Fee in LUNA per cashlink</span>
-            <input v-model="feePerCashlink" class="nq-input block w-full mt-2" type="number" />
+            <span class="nq-label">Fee in LUNA per byte</span>
+            <input v-model="feePerByte" class="nq-input block w-full mt-2" type="number" />
           </label>
           <p class="nq-notice warning">{{ feeErrorMessage }}</p>
 
@@ -46,6 +46,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
+import { Cashlink } from '../lib/Cashlink';
 
 function isNumberValid(number: number): boolean {
   const value = Number(number);
@@ -70,17 +71,15 @@ export default defineComponent({
   setup(_, { emit }) {
     const numberOfCashlinks = ref(5);
     const amountPerCashlink = ref(10);
-    const feePerCashlink = ref(1);
+    const feePerByte = ref(1);
 
     const total = computed(() => {
-      return numberOfCashlinks.value * (amountPerCashlink.value * 1e5 + feePerCashlink.value);
+      return numberOfCashlinks.value * (amountPerCashlink.value * 1e5 + feePerByte.value * Cashlink.SIZE);
     });
 
     const isValid = computed(() => {
       return (
-        isNumberValid(numberOfCashlinks.value) &&
-        isAmountValid(amountPerCashlink.value) &&
-        isFeeValid(feePerCashlink.value)
+        isNumberValid(numberOfCashlinks.value) && isAmountValid(amountPerCashlink.value) && isFeeValid(feePerByte.value)
       );
     });
 
@@ -101,7 +100,7 @@ export default defineComponent({
     });
 
     const feeErrorMessage = computed(() => {
-      if (isFeeValid(feePerCashlink.value)) {
+      if (isFeeValid(feePerByte.value)) {
         return null;
       }
 
@@ -112,7 +111,7 @@ export default defineComponent({
       const payload = {
         numberOfCashlinks: Number(numberOfCashlinks.value),
         amountPerCashlink: Number(amountPerCashlink.value * 1e5),
-        feePerCashlink: Number(feePerCashlink.value),
+        feePerCashlink: Number(feePerByte.value * Cashlink.SIZE),
       };
 
       console.log(payload);
@@ -124,7 +123,7 @@ export default defineComponent({
       numberErrorMessage,
       amountPerCashlink,
       amountErrorMessage,
-      feePerCashlink,
+      feePerByte,
       feeErrorMessage,
       total,
       isValid,

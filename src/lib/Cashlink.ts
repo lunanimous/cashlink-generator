@@ -1,20 +1,20 @@
 import { loadNimiq } from './CoreLoader';
 
 export class Cashlink {
-  public static async create(value: number): Promise<Cashlink> {
+  public static SIZE = 171;
+  public static FUNDING_DATA = new Uint8Array([0, 130, 128, 146, 135]); // 'CASH'.split('').map(c => c.charCodeAt(0) + 63);
+
+  public static async create(value: number, fee: number): Promise<Cashlink> {
     await loadNimiq();
     const keyPair = Nimiq.KeyPair.derive(Nimiq.PrivateKey.generate());
-    return new Cashlink(keyPair, keyPair.publicKey.toAddress(), value);
+
+    return new Cashlink(keyPair, keyPair.publicKey.toAddress(), value, fee);
   }
 
   private _theme: number;
   private _messageBytes: Uint8Array = new Uint8Array(0);
 
-  constructor(
-    public keyPair: Nimiq.KeyPair,
-    public address: Nimiq.Address,
-    public value: number
-  ) {
+  constructor(public keyPair: Nimiq.KeyPair, public address: Nimiq.Address, public value: number, public fee: number) {
     this._theme = 0;
   }
 
@@ -25,9 +25,7 @@ export class Cashlink {
     const buf = new Nimiq.SerialBuffer(
       /*key*/ this.keyPair.privateKey.serializedSize +
         /*value*/ 8 +
-        /*message length*/ (this._messageBytes.byteLength || this._theme
-          ? 1
-          : 0) +
+        /*message length*/ (this._messageBytes.byteLength || this._theme ? 1 : 0) +
         /*message*/ this._messageBytes.byteLength +
         /*theme*/ (this._theme ? 1 : 0)
     );
@@ -47,12 +45,8 @@ export class Cashlink {
     result = result.replace(/\./g, '=');
     // iPhone also has a problem to parse long words with more then 300 chars in a URL in WhatsApp
     // (and possibly others). Therefore we break the words by adding a ~ every 256 characters in long words.
-    result = result.replace(/[A-Za-z0-9_]{257,}/g, (match) =>
-      match.replace(/.{256}/g, '$&~')
-    );
+    result = result.replace(/[A-Za-z0-9_]{257,}/g, (match) => match.replace(/.{256}/g, '$&~'));
 
     return result;
   }
-
-  async fund() {}
 }

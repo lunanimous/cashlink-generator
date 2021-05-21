@@ -17,9 +17,12 @@
       </div>
       <div class="nq-card-footer">
         <button v-if="!isWaitingForPayment" class="nq-button light-blue" @click="handlePay">Pay</button>
-        <p v-if="isWaitingForPayment" class="p-12 nq-notice warning">
-          Waiting for payment to be mined, this can take up to a minute...
-        </p>
+
+        <div v-if="isWaitingForPayment" class="p-12">
+          <p class="nq-notice warning">Waiting for payment to be mined, this can take up to a minute...</p>
+        </div>
+
+        <button class="mt-8 nq-button light-blue" @click="handleManualCheck">Check manually</button>
       </div>
     </div>
   </div>
@@ -30,6 +33,7 @@ import { computed, defineComponent, onBeforeUnmount, onDeactivated, onMounted, o
 import { connect, hubApi } from '../lib/NetworkClient';
 import { Client, ClientTransactionDetails, Transaction, Wallet } from '@nimiq/core-web';
 import { CashlinkConfig } from '../types';
+import { SignedTransaction } from '@nimiq/hub-api';
 
 export default defineComponent({
   props: {
@@ -95,6 +99,15 @@ export default defineComponent({
       }
     }
 
+    async function handleManualCheck() {
+      const tempAccount = await client.getAccount(wallet.value.address);
+
+      console.log(tempAccount, total.value);
+      if (tempAccount.balance >= total.value) {
+        emit('walletFunded');
+      }
+    }
+
     onMounted(async () => {
       client = await connect();
       listenerHandle = await client.addTransactionListener(transactionListener, [address.value]);
@@ -111,6 +124,7 @@ export default defineComponent({
       total,
       isWaitingForPayment,
       handlePay,
+      handleManualCheck,
     };
   },
 });
