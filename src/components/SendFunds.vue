@@ -30,11 +30,10 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeUnmount, onDeactivated, onMounted, onUnmounted, ref, toRefs } from 'vue';
+import { computed, defineComponent, onMounted, onUnmounted, ref, toRefs } from 'vue';
 import { connect, hubApi } from '../lib/NetworkClient';
-import { Client, ClientTransactionDetails, Transaction, Wallet } from '@nimiq/core-web';
+import { Client, ClientTransactionDetails, Wallet } from '@nimiq/core-web';
 import { CashlinkConfig } from '../types';
-import { SignedTransaction } from '@nimiq/hub-api';
 
 export default defineComponent({
   props: {
