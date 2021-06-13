@@ -48,30 +48,37 @@
 import { computed, defineComponent, ref } from 'vue';
 import { Cashlink } from '../lib/Cashlink';
 
+const DEFAULT_CASHLINKS = 5;
+const MAX_CASHLINKS = 100;
+const DEFAULT_AMOUNT = 10;
+const MIN_AMOUNT = 5;
+const DEFAULT_FEE = 1;
+const MIN_FEE = 1;
+
 function isNumberValid(number: number): boolean {
   const value = Number(number);
 
-  return value >= 1 && value <= 100;
+  return value >= 1 && value <= MAX_CASHLINKS;
 }
 
 function isAmountValid(amount: number): boolean {
   const value = Number(amount);
 
-  return value >= 5;
+  return value >= MIN_AMOUNT;
 }
 
 function isFeeValid(fee: number): boolean {
   const value = Number(fee);
 
-  return value >= 1;
+  return value >= MIN_FEE;
 }
 
 export default defineComponent({
   emits: ['configure'],
   setup(_, { emit }) {
-    const numberOfCashlinks = ref(5);
-    const amountPerCashlink = ref(10);
-    const feePerByte = ref(1);
+    const numberOfCashlinks = ref(DEFAULT_CASHLINKS);
+    const amountPerCashlink = ref(DEFAULT_AMOUNT);
+    const feePerByte = ref(DEFAULT_FEE);
 
     const total = computed(() => {
       return numberOfCashlinks.value * (amountPerCashlink.value * 1e5 + feePerByte.value * Cashlink.SIZE);
@@ -88,7 +95,7 @@ export default defineComponent({
         return null;
       }
 
-      return 'The number must be at least 1 and less than 100';
+      return `The number must be at least 1 and less than ${MAX_CASHLINKS}`;
     });
 
     const amountErrorMessage = computed(() => {
@@ -96,7 +103,7 @@ export default defineComponent({
         return null;
       }
 
-      return 'The amount must be at least 5 NIM';
+      return `The amount must be at least ${MIN_AMOUNT} NIM`;
     });
 
     const feeErrorMessage = computed(() => {
@@ -104,7 +111,7 @@ export default defineComponent({
         return null;
       }
 
-      return 'The fee must be at least 1 LUNA (0.00001 NIM)';
+      return `The fee must be at least ${MIN_FEE} LUNA (${MIN_FEE / 1e5} NIM)`;
     });
 
     function handleSubmit() {
